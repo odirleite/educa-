@@ -143,7 +143,7 @@ export default function Subjects({ data, activeCollegeId }: SubjectsProps) {
                 <div className="p-5">
                   <div className="flex justify-between items-start mb-4">
                     <h3 className="font-semibold text-lg text-gray-900 truncate pr-4">{subject.name}</h3>
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-1 transition-opacity">
                       <button onClick={() => openModal(subject)} className="p-1.5 text-gray-400 hover:text-indigo-600 rounded-md hover:bg-indigo-50">
                         <Edit2 className="w-4 h-4" />
                       </button>

@@ -91,7 +91,7 @@ export default function Colleges({ data }: CollegesProps) {
                     </div>
                     <h3 className="font-bold text-xl text-gray-900 truncate pr-4">{college.name}</h3>
                   </div>
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-1 transition-opacity">
                     <button onClick={() => openModal(college)} className="p-1.5 text-gray-400 hover:text-indigo-600 rounded-md hover:bg-indigo-50">
                       <Edit2 className="w-4 h-4" />
                     </button>
