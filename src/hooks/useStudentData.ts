@@ -13,7 +13,12 @@ export function useStudentData() {
   const [subjects, setSubjects] = useState<Subject[]>(() => {
     const saved = localStorage.getItem('student_subjects');
     const parsed = saved ? JSON.parse(saved) : [];
-    return parsed.map((s: any) => ({ ...s, collegeId: s.collegeId || 'c1' }));
+    return parsed.map((s: any) => ({ 
+      ...s, 
+      collegeId: s.collegeId || 'c1',
+      status: s.status || 'active',
+      semester: s.semester || ''
+    }));
   });
 
   const [tasks, setTasks] = useState<Task[]>(() => {

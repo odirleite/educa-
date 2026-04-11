@@ -14,6 +14,8 @@ export type Subject = {
   schedule: string;
   collegeId: string;
   notes?: string;
+  status?: 'active' | 'completed';
+  semester?: string;
 };
 
 export type Task = {

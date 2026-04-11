@@ -12,7 +12,7 @@ export default function Tasks({ data, activeCollegeId }: TasksProps) {
   const { subjects: allSubjects, tasks: allTasks, colleges, addTask, updateTask, deleteTask, toggleTaskCompletion } = data;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all');
+  const [filter, setFilter] = useState<'all' | 'pending' | 'completed' | 'overdue'>('all');
 
   const subjects = activeCollegeId === 'all' 
     ? allSubjects 
@@ -73,8 +73,10 @@ export default function Tasks({ data, activeCollegeId }: TasksProps) {
 
   const filteredTasks = tasks
     .filter(t => {
+      const isOverdue = !t.completed && new Date(t.dueDate) < new Date(new Date().setHours(0,0,0,0));
       if (filter === 'pending') return !t.completed;
       if (filter === 'completed') return t.completed;
+      if (filter === 'overdue') return isOverdue;
       return true;
     })
     .sort((a, b) => {
@@ -103,18 +105,18 @@ export default function Tasks({ data, activeCollegeId }: TasksProps) {
       </header>
 
       {/* Filters */}
-      <div className="flex gap-2 bg-white p-1 rounded-xl border border-gray-200 inline-flex">
-        {(['all', 'pending', 'completed'] as const).map(f => (
+      <div className="flex gap-2 bg-white p-1 rounded-xl border border-gray-200 inline-flex overflow-x-auto max-w-full">
+        {(['all', 'pending', 'completed', 'overdue'] as const).map(f => (
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
               filter === f 
                 ? 'bg-gray-100 text-gray-900' 
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            {f === 'all' ? 'Todas' : f === 'pending' ? 'Pendentes' : 'Concluídas'}
+            {f === 'all' ? 'Todas' : f === 'pending' ? 'Pendentes' : f === 'completed' ? 'Concluídas' : 'Atrasadas'}
           </button>
         ))}
       </div>
