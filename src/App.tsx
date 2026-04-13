@@ -22,16 +22,16 @@ export default function App() {
   ] as const;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row font-sans text-gray-900">
+    <div className="min-h-screen bg-slate-950 flex flex-col md:flex-row font-sans text-slate-50">
       {/* Mobile Header */}
-      <div className="md:hidden bg-white border-b border-gray-200 p-4 flex items-center justify-between sticky top-0 z-20">
-        <div className="flex items-center gap-2 text-indigo-600 font-bold text-xl">
+      <div className="md:hidden bg-slate-900 border-b border-slate-800 p-4 flex items-center justify-between sticky top-0 z-20">
+        <div className="flex items-center gap-2 text-indigo-500 font-bold text-xl">
           <BookOpen className="w-6 h-6" />
           <span>Estuda+</span>
         </div>
         <button 
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+          className="p-2 text-slate-400 hover:bg-slate-800 rounded-lg"
         >
           {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
@@ -40,21 +40,21 @@ export default function App() {
       {/* Sidebar */}
       <aside className={`
         fixed md:sticky top-0 left-0 z-10
-        w-64 h-screen bg-white border-r border-gray-200
+        w-64 h-screen bg-slate-900 border-r border-slate-800
         flex flex-col transition-transform duration-300 ease-in-out
         ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
-        <div className="p-6 hidden md:flex items-center gap-2 text-indigo-600 font-bold text-2xl tracking-tight">
+        <div className="p-6 hidden md:flex items-center gap-2 text-indigo-500 font-bold text-2xl tracking-tight">
           <BookOpen className="w-8 h-8" />
           <span>Estuda+</span>
         </div>
 
         <div className="px-4 py-2">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-4">Visualização</p>
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 px-4">Visualização</p>
           <div className="space-y-1">
             <button 
               onClick={() => setActiveCollegeId('all')} 
-              className={`w-full flex items-center gap-3 px-4 py-2 rounded-xl transition-colors text-sm ${activeCollegeId === 'all' ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}
+              className={`w-full flex items-center gap-3 px-4 py-2 rounded-xl transition-colors text-sm ${activeCollegeId === 'all' ? 'bg-slate-800 text-slate-50 font-medium' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'}`}
             >
               <Globe className="w-4 h-4" /> Todas
             </button>
@@ -62,7 +62,7 @@ export default function App() {
               <button 
                 key={c.id} 
                 onClick={() => setActiveCollegeId(c.id)} 
-                className={`w-full flex items-center gap-3 px-4 py-2 rounded-xl transition-colors text-sm ${activeCollegeId === c.id ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}
+                className={`w-full flex items-center gap-3 px-4 py-2 rounded-xl transition-colors text-sm ${activeCollegeId === c.id ? 'bg-slate-800 text-slate-50 font-medium' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'}`}
               >
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: c.color }} />
                 <span className="truncate">{c.name}</span>
@@ -71,7 +71,7 @@ export default function App() {
           </div>
         </div>
 
-        <div className="my-2 border-t border-gray-100 mx-4"></div>
+        <div className="my-2 border-t border-slate-800 mx-4"></div>
 
         <nav className="flex-1 px-4 py-2 space-y-1">
           {navItems.map((item) => {
@@ -87,21 +87,21 @@ export default function App() {
                 className={`
                   w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors
                   ${isActive 
-                    ? 'bg-indigo-50 text-indigo-700 font-medium' 
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}
+                    ? 'bg-indigo-500/10 text-indigo-400 font-medium' 
+                    : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'}
                 `}
               >
-                <Icon className={`w-5 h-5 ${isActive ? 'text-indigo-600' : 'text-gray-400'}`} />
+                <Icon className={`w-5 h-5 ${isActive ? 'text-indigo-400' : 'text-slate-500'}`} />
                 {item.label}
               </button>
             );
           })}
         </nav>
 
-        <div className="p-4 border-t border-gray-100">
-          <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl p-4 text-white">
+        <div className="p-4 border-t border-slate-800">
+          <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-xl p-4 text-white">
             <h3 className="font-semibold text-sm mb-1">Semestre Atual</h3>
-            <p className="text-indigo-100 text-xs">Mantenha o foco nos seus objetivos!</p>
+            <p className="text-indigo-200 text-xs">Mantenha o foco nos seus objetivos!</p>
           </div>
         </div>
       </aside>
@@ -117,7 +117,7 @@ export default function App() {
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
         <div 
-          className="fixed inset-0 bg-black/20 z-0 md:hidden"
+          className="fixed inset-0 bg-black/50 z-0 md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}

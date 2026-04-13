@@ -43,8 +43,8 @@ export default function Dashboard({ data, activeCollegeId, onNavigate }: Dashboa
       className="space-y-8"
     >
       <header>
-        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Olá, Estudante! 👋</h1>
-        <p className="text-gray-500 mt-1">Aqui está o resumo das suas atividades.</p>
+        <h1 className="text-3xl font-bold text-slate-50 tracking-tight">Olá, Estudante! 👋</h1>
+        <p className="text-slate-400 mt-1">Aqui está o resumo das suas atividades.</p>
       </header>
 
       {/* Stats Grid */}
@@ -52,13 +52,13 @@ export default function Dashboard({ data, activeCollegeId, onNavigate }: Dashboa
         {stats.map((stat, idx) => {
           const Icon = stat.icon;
           return (
-            <div key={idx} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
+            <div key={idx} className="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-sm flex items-center gap-4">
               <div className={`${stat.color} p-4 rounded-xl text-white`}>
                 <Icon className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-gray-500 text-sm font-medium">{stat.label}</p>
-                <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                <p className="text-slate-400 text-sm font-medium">{stat.label}</p>
+                <p className="text-2xl font-bold text-slate-50">{stat.value}</p>
               </div>
             </div>
           );
@@ -67,23 +67,23 @@ export default function Dashboard({ data, activeCollegeId, onNavigate }: Dashboa
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Upcoming Tasks */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
-          <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-              <Clock className="w-5 h-5 text-indigo-500" />
+        <div className="bg-slate-900 rounded-2xl border border-slate-800 shadow-sm overflow-hidden flex flex-col">
+          <div className="p-6 border-b border-slate-800 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-slate-50 flex items-center gap-2">
+              <Clock className="w-5 h-5 text-indigo-400" />
               Próximas Tarefas
             </h2>
             <button 
               onClick={() => onNavigate('tasks')}
-              className="text-sm text-indigo-600 font-medium hover:text-indigo-700 flex items-center gap-1"
+              className="text-sm text-indigo-400 font-medium hover:text-indigo-300 flex items-center gap-1"
             >
               Ver todas <ArrowRight className="w-4 h-4" />
             </button>
           </div>
           <div className="p-4 flex-1">
             {upcomingTasks.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-gray-400 py-8">
-                <CheckCircle className="w-12 h-12 mb-3 text-gray-200" />
+              <div className="h-full flex flex-col items-center justify-center text-slate-500 py-8">
+                <CheckCircle className="w-12 h-12 mb-3 text-slate-700" />
                 <p>Tudo em dia! Nenhuma tarefa pendente.</p>
               </div>
             ) : (
@@ -91,15 +91,15 @@ export default function Dashboard({ data, activeCollegeId, onNavigate }: Dashboa
                 {upcomingTasks.map(task => {
                   const subject = allSubjects.find(s => s.id === task.subjectId);
                   return (
-                    <li key={task.id} className="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors">
+                    <li key={task.id} className="flex items-start gap-3 p-3 rounded-xl hover:bg-slate-800/50 transition-colors">
                       <button 
                         onClick={() => toggleTaskCompletion(task.id)}
-                        className="mt-0.5 flex-shrink-0 text-gray-300 hover:text-emerald-500 transition-colors"
+                        className="mt-0.5 flex-shrink-0 text-slate-600 hover:text-emerald-400 transition-colors"
                       >
                         <CheckCircle className="w-6 h-6" />
                       </button>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">{task.title}</p>
+                        <p className="text-sm font-medium text-slate-50 truncate">{task.title}</p>
                         <div className="flex items-center gap-2 mt-1 text-xs">
                           {subject && (
                             <span 
@@ -109,7 +109,7 @@ export default function Dashboard({ data, activeCollegeId, onNavigate }: Dashboa
                               {subject.name}
                             </span>
                           )}
-                          <span className="text-gray-500">
+                          <span className="text-slate-400">
                             {new Date(task.dueDate).toLocaleDateString('pt-BR')}
                           </span>
                         </div>
@@ -123,27 +123,27 @@ export default function Dashboard({ data, activeCollegeId, onNavigate }: Dashboa
         </div>
 
         {/* Subjects Overview */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
-          <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-              <BookOpen className="w-5 h-5 text-indigo-500" />
+        <div className="bg-slate-900 rounded-2xl border border-slate-800 shadow-sm overflow-hidden flex flex-col">
+          <div className="p-6 border-b border-slate-800 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-slate-50 flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-indigo-400" />
               Suas Matérias
             </h2>
             <button 
               onClick={() => onNavigate('subjects')}
-              className="text-sm text-indigo-600 font-medium hover:text-indigo-700 flex items-center gap-1"
+              className="text-sm text-indigo-400 font-medium hover:text-indigo-300 flex items-center gap-1"
             >
               Gerenciar <ArrowRight className="w-4 h-4" />
             </button>
           </div>
           <div className="p-4 flex-1">
             {subjects.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-gray-400 py-8">
-                <BookOpen className="w-12 h-12 mb-3 text-gray-200" />
+              <div className="h-full flex flex-col items-center justify-center text-slate-500 py-8">
+                <BookOpen className="w-12 h-12 mb-3 text-slate-700" />
                 <p>Nenhuma matéria cadastrada.</p>
                 <button 
                   onClick={() => onNavigate('subjects')}
-                  className="mt-4 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg text-sm font-medium hover:bg-indigo-100"
+                  className="mt-4 px-4 py-2 bg-indigo-500/10 text-indigo-400 rounded-lg text-sm font-medium hover:bg-indigo-500/20"
                 >
                   Adicionar Matéria
                 </button>
@@ -153,15 +153,15 @@ export default function Dashboard({ data, activeCollegeId, onNavigate }: Dashboa
                 {subjects.slice(0, 6).map(subject => (
                   <div 
                     key={subject.id} 
-                    className="p-3 rounded-xl border border-gray-100 flex items-center gap-3"
+                    className="p-3 rounded-xl border border-slate-800 flex items-center gap-3"
                   >
                     <div 
                       className="w-3 h-10 rounded-full" 
                       style={{ backgroundColor: subject.color }}
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">{subject.name}</p>
-                      <p className="text-xs text-gray-500 truncate">{subject.schedule}</p>
+                      <p className="text-sm font-medium text-slate-50 truncate">{subject.name}</p>
+                      <p className="text-xs text-slate-400 truncate">{subject.schedule}</p>
                     </div>
                   </div>
                 ))}
