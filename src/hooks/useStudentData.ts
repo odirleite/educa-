@@ -1,88 +1,202 @@
 import { useState, useEffect } from 'react';
 import { Subject, Task, College } from '../types';
+import { db, auth } from '../firebase';
+import { collection, query, where, onSnapshot, doc, setDoc, updateDoc, deleteDoc, writeBatch } from 'firebase/firestore';
 
-export function useStudentData() {
-  const [colleges, setColleges] = useState<College[]>(() => {
-    const saved = localStorage.getItem('student_colleges');
-    return saved ? JSON.parse(saved) : [
-      { id: 'c1', name: 'Faculdade 1', color: '#3b82f6', progress: 0, missingRequirements: '' },
-      { id: 'c2', name: 'Faculdade 2', color: '#8b5cf6', progress: 0, missingRequirements: '' }
-    ];
-  });
+enum OperationType {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  LIST = 'list',
+  GET = 'get',
+  WRITE = 'write',
+}
 
-  const [subjects, setSubjects] = useState<Subject[]>(() => {
-    const saved = localStorage.getItem('student_subjects');
-    const parsed = saved ? JSON.parse(saved) : [];
-    return parsed.map((s: any) => ({ 
-      ...s, 
-      collegeId: s.collegeId || 'c1',
-      status: s.status || 'active',
-      semester: s.semester || ''
-    }));
-  });
+interface FirestoreErrorInfo {
+  error: string;
+  operationType: OperationType;
+  path: string | null;
+  authInfo: {
+    userId: string | undefined;
+    email: string | null | undefined;
+    emailVerified: boolean | undefined;
+    isAnonymous: boolean | undefined;
+    tenantId: string | null | undefined;
+    providerInfo: {
+      providerId: string;
+      displayName: string | null;
+      email: string | null;
+      photoUrl: string | null;
+    }[];
+  }
+}
 
-  const [tasks, setTasks] = useState<Task[]>(() => {
-    const saved = localStorage.getItem('student_tasks');
-    return saved ? JSON.parse(saved) : [];
-  });
+function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+  const errInfo: FirestoreErrorInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    authInfo: {
+      userId: auth.currentUser?.uid,
+      email: auth.currentUser?.email,
+      emailVerified: auth.currentUser?.emailVerified,
+      isAnonymous: auth.currentUser?.isAnonymous,
+      tenantId: auth.currentUser?.tenantId,
+      providerInfo: auth.currentUser?.providerData.map(provider => ({
+        providerId: provider.providerId,
+        displayName: provider.displayName,
+        email: provider.email,
+        photoUrl: provider.photoURL
+      })) || []
+    },
+    operationType,
+    path
+  };
+  console.error('Firestore Error: ', JSON.stringify(errInfo));
+  throw new Error(JSON.stringify(errInfo));
+}
+
+export function useStudentData(userId: string | null) {
+  const [colleges, setColleges] = useState<College[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
 
   useEffect(() => {
-    localStorage.setItem('student_colleges', JSON.stringify(colleges));
-  }, [colleges]);
+    if (!userId) {
+      setColleges([]);
+      setSubjects([]);
+      setTasks([]);
+      return;
+    }
 
-  useEffect(() => {
-    localStorage.setItem('student_subjects', JSON.stringify(subjects));
-  }, [subjects]);
+    const qColleges = query(collection(db, 'colleges'), where('userId', '==', userId));
+    const unsubColleges = onSnapshot(qColleges, (snapshot) => {
+      setColleges(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as College)));
+    }, (error) => handleFirestoreError(error, OperationType.GET, 'colleges'));
 
-  useEffect(() => {
-    localStorage.setItem('student_tasks', JSON.stringify(tasks));
-  }, [tasks]);
+    const qSubjects = query(collection(db, 'subjects'), where('userId', '==', userId));
+    const unsubSubjects = onSnapshot(qSubjects, (snapshot) => {
+      setSubjects(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Subject)));
+    }, (error) => handleFirestoreError(error, OperationType.GET, 'subjects'));
 
-  const addCollege = (college: Omit<College, 'id'>) => {
-    setColleges([...colleges, { ...college, id: crypto.randomUUID() }]);
+    const qTasks = query(collection(db, 'tasks'), where('userId', '==', userId));
+    const unsubTasks = onSnapshot(qTasks, (snapshot) => {
+      setTasks(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Task)));
+    }, (error) => handleFirestoreError(error, OperationType.GET, 'tasks'));
+
+    return () => {
+      unsubColleges();
+      unsubSubjects();
+      unsubTasks();
+    };
+  }, [userId]);
+
+  const addCollege = async (college: Omit<College, 'id'>) => {
+    if (!userId) return;
+    const id = crypto.randomUUID();
+    try {
+      await setDoc(doc(db, 'colleges', id), { ...college, id, userId, createdAt: new Date().toISOString() });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, 'colleges');
+    }
   };
 
-  const updateCollege = (id: string, updated: Partial<College>) => {
-    setColleges(colleges.map(c => c.id === id ? { ...c, ...updated } : c));
+  const updateCollege = async (id: string, updated: Partial<College>) => {
+    try {
+      await updateDoc(doc(db, 'colleges', id), updated);
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, 'colleges');
+    }
   };
 
-  const deleteCollege = (id: string) => {
-    setColleges(colleges.filter(c => c.id !== id));
-    const subjectsToDelete = subjects.filter(s => s.collegeId === id).map(s => s.id);
-    setSubjects(subjects.filter(s => s.collegeId !== id));
-    setTasks(tasks.filter(t => !subjectsToDelete.includes(t.subjectId)));
+  const deleteCollege = async (id: string) => {
+    try {
+      const batch = writeBatch(db);
+      batch.delete(doc(db, 'colleges', id));
+      
+      const subjectsToDelete = subjects.filter(s => s.collegeId === id);
+      subjectsToDelete.forEach(s => {
+        batch.delete(doc(db, 'subjects', s.id));
+      });
+
+      const subjectIds = subjectsToDelete.map(s => s.id);
+      const tasksToDelete = tasks.filter(t => subjectIds.includes(t.subjectId));
+      tasksToDelete.forEach(t => {
+        batch.delete(doc(db, 'tasks', t.id));
+      });
+
+      await batch.commit();
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, 'colleges');
+    }
   };
 
-  const addSubject = (subject: Omit<Subject, 'id'>) => {
-    const newSubject = { ...subject, id: crypto.randomUUID() };
-    setSubjects([...subjects, newSubject]);
+  const addSubject = async (subject: Omit<Subject, 'id'>) => {
+    if (!userId) return;
+    const id = crypto.randomUUID();
+    try {
+      await setDoc(doc(db, 'subjects', id), { ...subject, id, userId, createdAt: new Date().toISOString() });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, 'subjects');
+    }
   };
 
-  const updateSubject = (id: string, updated: Partial<Subject>) => {
-    setSubjects(subjects.map(s => s.id === id ? { ...s, ...updated } : s));
+  const updateSubject = async (id: string, updated: Partial<Subject>) => {
+    try {
+      await updateDoc(doc(db, 'subjects', id), updated);
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, 'subjects');
+    }
   };
 
-  const deleteSubject = (id: string) => {
-    setSubjects(subjects.filter(s => s.id !== id));
-    // Also delete associated tasks
-    setTasks(tasks.filter(t => t.subjectId !== id));
+  const deleteSubject = async (id: string) => {
+    try {
+      const batch = writeBatch(db);
+      batch.delete(doc(db, 'subjects', id));
+      
+      const tasksToDelete = tasks.filter(t => t.subjectId === id);
+      tasksToDelete.forEach(t => {
+        batch.delete(doc(db, 'tasks', t.id));
+      });
+
+      await batch.commit();
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, 'subjects');
+    }
   };
 
-  const addTask = (task: Omit<Task, 'id'>) => {
-    const newTask = { ...task, id: crypto.randomUUID() };
-    setTasks([...tasks, newTask]);
+  const addTask = async (task: Omit<Task, 'id'>) => {
+    if (!userId) return;
+    const id = crypto.randomUUID();
+    try {
+      await setDoc(doc(db, 'tasks', id), { ...task, id, userId, createdAt: new Date().toISOString() });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, 'tasks');
+    }
   };
 
-  const updateTask = (id: string, updated: Partial<Task>) => {
-    setTasks(tasks.map(t => t.id === id ? { ...t, ...updated } : t));
+  const updateTask = async (id: string, updated: Partial<Task>) => {
+    try {
+      await updateDoc(doc(db, 'tasks', id), updated);
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, 'tasks');
+    }
   };
 
-  const deleteTask = (id: string) => {
-    setTasks(tasks.filter(t => t.id !== id));
+  const deleteTask = async (id: string) => {
+    try {
+      await deleteDoc(doc(db, 'tasks', id));
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, 'tasks');
+    }
   };
 
-  const toggleTaskCompletion = (id: string) => {
-    setTasks(tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
+  const toggleTaskCompletion = async (id: string) => {
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+    try {
+      await updateDoc(doc(db, 'tasks', id), { completed: !task.completed });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, 'tasks');
+    }
   };
 
   return {

@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useStudentData } from './hooks/useStudentData';
-import { LayoutDashboard, BookOpen, CheckSquare, Menu, X, GraduationCap, Globe } from 'lucide-react';
+import { LayoutDashboard, BookOpen, CheckSquare, Menu, X, GraduationCap, Globe, LogOut, LogIn } from 'lucide-react';
 import Dashboard from './components/Dashboard';
 import Subjects from './components/Subjects';
 import Tasks from './components/Tasks';
 import Colleges from './components/Colleges';
+import { auth } from './firebase';
+import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut, User } from 'firebase/auth';
 
 type Tab = 'dashboard' | 'colleges' | 'subjects' | 'tasks';
 
@@ -12,7 +14,68 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [activeCollegeId, setActiveCollegeId] = useState<string | 'all'>('all');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const studentData = useStudentData();
+  const [user, setUser] = useState<User | null>(null);
+  const [loadingAuth, setLoadingAuth] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoadingAuth(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const studentData = useStudentData(user?.uid || null);
+
+  const handleLogin = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (error) {
+      console.error('Error signing in:', error);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
+  if (loadingAuth) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 text-slate-50">
+        <div className="bg-slate-900 p-8 rounded-2xl border border-slate-800 max-w-md w-full text-center space-y-6">
+          <div className="flex justify-center mb-4">
+            <div className="bg-indigo-500/10 p-4 rounded-full">
+              <BookOpen className="w-12 h-12 text-indigo-500" />
+            </div>
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight mb-2">Estuda+</h1>
+            <p className="text-slate-400">Seu organizador estudantil pessoal. Faça login para acessar suas matérias e tarefas de qualquer lugar.</p>
+          </div>
+          <button
+            onClick={handleLogin}
+            className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-medium transition-colors"
+          >
+            <LogIn className="w-5 h-5" />
+            Entrar com Google
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -99,6 +162,21 @@ export default function App() {
         </nav>
 
         <div className="p-4 border-t border-slate-800">
+          <div className="flex items-center justify-between px-2 mb-4">
+            <div className="flex items-center gap-2 overflow-hidden">
+              {user.photoURL ? (
+                <img src={user.photoURL} alt="Profile" className="w-8 h-8 rounded-full" referrerPolicy="no-referrer" />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center">
+                  <span className="text-xs font-medium">{user.email?.[0].toUpperCase()}</span>
+                </div>
+              )}
+              <span className="text-sm text-slate-300 truncate">{user.displayName || user.email}</span>
+            </div>
+            <button onClick={handleLogout} className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors" title="Sair">
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
           <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-xl p-4 text-white">
             <h3 className="font-semibold text-sm mb-1">Semestre Atual</h3>
             <p className="text-indigo-200 text-xs">Mantenha o foco nos seus objetivos!</p>

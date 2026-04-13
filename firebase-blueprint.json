@@ -1,0 +1,68 @@
+{
+  "entities": {
+    "College": {
+      "title": "College",
+      "description": "A college or university",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "color": { "type": "string" },
+        "progress": { "type": "number" },
+        "missingRequirements": { "type": "string" },
+        "userId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "color", "userId"]
+    },
+    "Subject": {
+      "title": "Subject",
+      "description": "A subject or course",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "color": { "type": "string" },
+        "professor": { "type": "string" },
+        "schedule": { "type": "string" },
+        "collegeId": { "type": "string" },
+        "notes": { "type": "string" },
+        "status": { "type": "string", "enum": ["active", "completed"] },
+        "semester": { "type": "string" },
+        "userId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "color", "collegeId", "userId"]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "A task or assignment",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "dueDate": { "type": "string", "format": "date-time" },
+        "subjectId": { "type": "string" },
+        "completed": { "type": "boolean" },
+        "userId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "title", "dueDate", "subjectId", "completed", "userId"]
+    }
+  },
+  "firestore": {
+    "colleges": {
+      "schema": { "$ref": "#/entities/College" },
+      "description": "Colleges collection"
+    },
+    "subjects": {
+      "schema": { "$ref": "#/entities/Subject" },
+      "description": "Subjects collection"
+    },
+    "tasks": {
+      "schema": { "$ref": "#/entities/Task" },
+      "description": "Tasks collection"
+    }
+  }
+}

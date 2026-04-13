@@ -4,6 +4,8 @@ export type College = {
   color: string;
   progress?: number;
   missingRequirements?: string;
+  userId?: string;
+  createdAt?: string;
 };
 
 export type Subject = {
@@ -16,6 +18,8 @@ export type Subject = {
   notes?: string;
   status?: 'active' | 'completed';
   semester?: string;
+  userId?: string;
+  createdAt?: string;
 };
 
 export type Task = {
@@ -25,4 +29,6 @@ export type Task = {
   dueDate: string;
   subjectId: string;
   completed: boolean;
+  userId?: string;
+  createdAt?: string;
 };
