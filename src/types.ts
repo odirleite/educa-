@@ -18,6 +18,7 @@ export type Subject = {
   notes?: string;
   status?: 'active' | 'completed';
   semester?: string;
+  progress?: number;
   userId?: string;
   createdAt?: string;
 };

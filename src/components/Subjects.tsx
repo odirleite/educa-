@@ -28,7 +28,8 @@ export default function Subjects({ data, activeCollegeId }: SubjectsProps) {
     collegeId: activeCollegeId === 'all' ? (colleges[0]?.id || '') : activeCollegeId,
     notes: '',
     status: 'active' as 'active' | 'completed',
-    semester: ''
+    semester: '',
+    progress: 0
   });
 
   const handleSubmit = (e: FormEvent) => {
@@ -52,7 +53,8 @@ export default function Subjects({ data, activeCollegeId }: SubjectsProps) {
         collegeId: subject.collegeId,
         notes: subject.notes || '',
         status: subject.status || 'active',
-        semester: subject.semester || ''
+        semester: subject.semester || '',
+        progress: subject.progress || 0
       });
     } else {
       setEditingId(null);
@@ -64,7 +66,8 @@ export default function Subjects({ data, activeCollegeId }: SubjectsProps) {
         collegeId: activeCollegeId === 'all' ? (colleges[0]?.id || '') : activeCollegeId,
         notes: '',
         status: 'active',
-        semester: ''
+        semester: '',
+        progress: 0
       });
     }
     setIsModalOpen(true);
@@ -169,6 +172,21 @@ export default function Subjects({ data, activeCollegeId }: SubjectsProps) {
                     <p className="flex items-center gap-2">
                       <span className="font-medium text-slate-300">Horário:</span> {subject.schedule || 'Não informado'}
                     </p>
+                    
+                    {/* Progress Bar inside Subject Card */}
+                    <div className="pt-2 mt-2 border-t border-slate-800">
+                      <div className="flex justify-between items-center mb-1.5">
+                        <span className="text-xs font-semibold text-slate-400">Progresso</span>
+                        <span className="text-xs font-bold" style={{ color: subject.color }}>{subject.progress || 0}%</span>
+                      </div>
+                      <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                        <div 
+                          className="h-1.5 rounded-full transition-all duration-1000 ease-out" 
+                          style={{ width: `${subject.progress || 0}%`, backgroundColor: subject.color }} 
+                        />
+                      </div>
+                    </div>
+
                     {subject.notes && (
                       <div className="mt-3 pt-3 border-t border-slate-800">
                         <p className="text-xs font-medium text-slate-300 mb-1">Anotações:</p>
@@ -306,6 +324,21 @@ export default function Subjects({ data, activeCollegeId }: SubjectsProps) {
                     className="w-full px-4 py-2 bg-slate-950 border border-slate-800 text-slate-50 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all resize-none h-20 placeholder-slate-600"
                     placeholder="Link do meet, sala de aula, critérios de avaliação..."
                   />
+                </div>
+
+                <div className="border-t border-slate-800 pt-4">
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Progresso da Matéria (%)</label>
+                  <div className="flex items-center gap-4">
+                    <input 
+                      type="range" 
+                      min="0" 
+                      max="100" 
+                      value={formData.progress}
+                      onChange={e => setFormData({...formData, progress: parseInt(e.target.value)})}
+                      className="flex-1 accent-indigo-500"
+                    />
+                    <span className="text-lg font-bold text-slate-50 w-12 text-right">{formData.progress}%</span>
+                  </div>
                 </div>
 
                 <div className="pt-4 flex gap-3">

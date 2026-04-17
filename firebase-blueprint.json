@@ -29,6 +29,7 @@
         "notes": { "type": "string" },
         "status": { "type": "string", "enum": ["active", "completed"] },
         "semester": { "type": "string" },
+        "progress": { "type": "number" },
         "userId": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
