@@ -185,7 +185,24 @@ export default function App() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-4 md:p-8 max-w-5xl mx-auto w-full">
+      <main className="flex-1 p-4 md:p-8 max-w-5xl mx-auto w-full flex flex-col">
+        {/* Global Context Selector */}
+        <div className="flex justify-end mb-6">
+          <div className="flex items-center gap-3 bg-slate-900 border border-slate-800 rounded-xl p-1.5 shadow-sm">
+            <span className="text-sm text-slate-400 pl-2 hidden sm:inline">Visão:</span>
+            <select 
+              value={activeCollegeId}
+              onChange={(e) => setActiveCollegeId(e.target.value)}
+              className="bg-slate-950 text-slate-50 border border-slate-800 text-sm rounded-lg px-3 py-1.5 outline-none focus:border-indigo-500"
+            >
+              <option value="all">Todas as faculdades</option>
+              {studentData.colleges.map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
         {activeTab === 'dashboard' && <Dashboard data={studentData} activeCollegeId={activeCollegeId} onNavigate={setActiveTab} />}
         {activeTab === 'colleges' && <Colleges data={studentData} />}
         {activeTab === 'subjects' && <Subjects data={studentData} activeCollegeId={activeCollegeId} />}
