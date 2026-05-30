@@ -1,6 +1,16 @@
 import { useStudentData } from '../hooks/useStudentData';
-import { BookOpen, CheckCircle, Clock, ArrowRight } from 'lucide-react';
+import { BookOpen, CheckCircle, Clock, ArrowRight, BarChart3 } from 'lucide-react';
 import { motion } from 'motion/react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
+} from 'recharts';
 
 type DashboardProps = {
   data: ReturnType<typeof useStudentData>;
@@ -35,6 +45,15 @@ export default function Dashboard({ data, activeCollegeId, onNavigate }: Dashboa
     { label: 'Tarefas Pendentes', value: pendingTasks.length, icon: Clock, color: 'bg-amber-500' },
     { label: 'Tarefas Concluídas', value: completedTasks.length, icon: CheckCircle, color: 'bg-emerald-500' },
   ];
+
+  const chartData = subjects.map(subject => {
+    const subjectTasks = tasks.filter(t => t.subjectId === subject.id);
+    return {
+      name: subject.name,
+      Concluídas: subjectTasks.filter(t => t.completed).length,
+      Pendentes: subjectTasks.filter(t => !t.completed).length,
+    };
+  }).filter(item => item.Concluídas > 0 || item.Pendentes > 0);
 
   return (
     <motion.div 
@@ -170,6 +189,44 @@ export default function Dashboard({ data, activeCollegeId, onNavigate }: Dashboa
           </div>
         </div>
       </div>
+
+      {/* Chart Section */}
+      {chartData.length > 0 && (
+        <div className="bg-slate-900 rounded-2xl border border-slate-800 shadow-sm overflow-hidden flex flex-col">
+          <div className="p-6 border-b border-slate-800 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-slate-50 flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-indigo-400" />
+              Distribuição de Tarefas
+            </h2>
+          </div>
+          <div className="p-6 h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={chartData}
+                margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                <XAxis 
+                  dataKey="name" 
+                  stroke="#94a3b8" 
+                  fontSize={12} 
+                  tickLine={false} 
+                  axisLine={false} 
+                  tickFormatter={(value) => value.length > 15 ? value.substring(0, 15) + '...' : value}
+                />
+                <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
+                <Tooltip 
+                  cursor={{ fill: '#1e293b' }}
+                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc', borderRadius: '0.5rem' }}
+                />
+                <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                <Bar dataKey="Pendentes" fill="#f59e0b" radius={[4, 4, 0, 0]} maxBarSize={50} />
+                <Bar dataKey="Concluídas" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={50} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 }
